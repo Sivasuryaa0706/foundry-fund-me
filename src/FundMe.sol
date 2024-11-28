@@ -3,8 +3,9 @@
 pragma solidity ^0.8.18;
 
 import {PriceConverter} from "./PriceConverter.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-error FundMe__notOwner();
+error notOwner();
 
 contract FundMe {
     using PriceConverter for uint256; //Saying that uint256 variables can be accessed by priceConverter
@@ -59,9 +60,16 @@ contract FundMe {
         // require(msg.sender == i_owner, "Must be Owner!");
         // require can be replaced by errors. It is gas efficient
         if (msg.sender != i_owner) {
-            revert FundMe__notOwner();
+            revert notOwner();
         }
         _;
+    }
+
+    function getVersion() public view returns (uint256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(
+            0x694AA1769357215DE4FAC081bf1f309aDC325306
+        );
+        return priceFeed.version();
     }
 
     receive() external payable {

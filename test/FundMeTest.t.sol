@@ -12,8 +12,13 @@ contract FundMeTest is Test {
         fundMe = new FundMe();
     }
 
-    function testMinimumDollarFive() public {
-        console.log(fundMe.MIN_USD()); //Variables accessed by .var_name().
+    function testMinimumDollarFive() public view {
+        // console.log(fundMe.MIN_USD()); //Variables accessed by .var_name().
         assertEq(fundMe.MIN_USD(), 5e18);
+    }
+
+    function testPriceFeedVersionIsAccurate() public view {
+        uint256 version = fundMe.getVersion();
+        assertEq(version, 4);
     }
 }
