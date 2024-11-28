@@ -5,7 +5,7 @@ pragma solidity ^0.8.18;
 import {PriceConverter} from "./PriceConverter.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-error notOwner();
+error FundMe__notOwner();
 
 contract FundMe {
     using PriceConverter for uint256; //Saying that uint256 variables can be accessed by priceConverter
@@ -20,9 +20,11 @@ contract FundMe {
     // Immutable variables are like constants.
     //Values of immutable variables can be set inside the constructor but cannot be modified afterwards.
     address immutable i_owner;
+    AggregatorV3Interface s_priceFeed;
 
-    constructor() {
+    constructor(address priceFeed) {
         i_owner = msg.sender;
+        s_priceFeed = AggregatorV3Interface(priceFeed);
     }
 
     function fund() public payable {
@@ -30,7 +32,7 @@ contract FundMe {
 
         //msg.value.getConversionRate() parameter followed by function when using library
         require(
-            msg.value.getConversionRate() >= MIN_USD,
+            msg.value.getConversionRate(s_priceFeed) >= MIN_USD,
             "Didn't send enough ETH"
         ); //minimum 1e18 = 1ETH
         funders.push(msg.sender);
@@ -60,16 +62,13 @@ contract FundMe {
         // require(msg.sender == i_owner, "Must be Owner!");
         // require can be replaced by errors. It is gas efficient
         if (msg.sender != i_owner) {
-            revert notOwner();
+            revert FundMe__notOwner();
         }
         _;
     }
 
     function getVersion() public view returns (uint256) {
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(
-            0x694AA1769357215DE4FAC081bf1f309aDC325306
-        );
-        return priceFeed.version();
+        return s_priceFeed.version();
     }
 
     receive() external payable {
