@@ -59,7 +59,7 @@ contract FundMe {
         // require(msg.sender == i_owner, "Must be Owner!");
         // require can be replaced by errors. It is gas efficient
         if (msg.sender != i_owner) {
-            revert notOwner();
+            revert FundMe__notOwner();
         }
         _;
     }
